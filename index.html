@@ -311,7 +311,7 @@
             </div>
             <div class="controls-top">
                 <button class="icon-btn" id="soundBtn" onclick="toggleSound()" title="تشغيل / كتم الموسيقى">🔊</button>
-                <button class="icon-btn" id="musicTypeBtn" onclick="switchMusicTrack()" title="تغيير النغمة (تيتانيك / صينية)">🎼</button>
+                <button class="icon-btn" id="musicTypeBtn" onclick="switchMusicTrack()" title="تغيير النغمة">🎼</button>
                 <button class="icon-btn" id="vibrateBtn" onclick="toggleVibrate()" title="الهزاز">📳</button>
             </div>
             <div class="level-badge" id="levelText">المستوى 1</div>
@@ -334,7 +334,7 @@
 
         <div class="info-section">
             <h3>🌿 نبذة عن اللعبة</h3>
-            <p>لعبة ملء الكؤوس الطبيعية تجمع بين الاسترخاء العقلي وأرباح مالية حقيقية تسحب عبر <b>USDT</b> أو <b>PayPal</b> عند الوصول إلى 50 دولار. استمتع بأجواء الطبيعة الخلابة والموسيقى الهادئة.</p>
+            <p>لعبة ملء الكؤوس الطبيعية تجمع بين الاسترخاء العقلي وأرباح مالية حقيقية تسحب عبر <b>USDT</b> أو <b>PayPal</b> عند الوصول إلى 50 دولار.</p>
         </div>
     </div>
 
@@ -376,9 +376,9 @@
 
     <div class="modal" id="aiModal">
         <div class="modal-content">
-            <h2>🤖 المساعد الذكي (خدمة العملاء)</h2>
+            <h2>🤖 المساعد الذكي</h2>
             <div class="ai-chat-box" id="aiChatResponse">
-                أهلاً بك! أنا مساعد الذكاء الاصطناعي الخاص باللعبة. كيف يمكنني مساعدتك بخصوص المستويات، سحب الأرباح، أو الإعلانات؟
+                أهلاً بك! كيف يمكنني مساعدتك بخصوص اللعبة أو السحب؟
             </div>
             <input type="text" id="aiQuestion" placeholder="اكتب سؤالك هنا..." style="padding: 10px; border-radius: 8px; border: none; background: rgba(255,255,255,0.1); color: white; text-align: right; outline: none;">
             <button class="game-btn" onclick="askAiBot()">إرسال للسؤال</button>
@@ -394,18 +394,14 @@
         let adCallback = null;
         let selectedPaymentMethod = 'USDT';
         let currentCupStyleId = 1;
-        
         let soundEnabled = true;
         let vibrateEnabled = true;
         let currentTrackIndex = 0;
 
         const palette = ['#ab47bc', '#ec407a', '#ffee58', '#26a69a', '#42a5f5', '#66bb6a', '#ffa726'];
-        
         const naturalBgs = [
             'linear-gradient(135deg, rgba(27, 46, 27, 0.9), rgba(15, 30, 15, 0.95)), url("https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80")',
-            'linear-gradient(135deg, rgba(12, 36, 97, 0.9), rgba(30, 55, 153, 0.95)), url("https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1200&q=80")',
-            'linear-gradient(135deg, rgba(44, 44, 84, 0.9), rgba(71, 71, 135, 0.95)), url("https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1200&q=80")',
-            'linear-gradient(135deg, rgba(27, 20, 100, 0.9), rgba(87, 88, 187, 0.95)), url("https://images.unsplash.com/photo-1511497584788-876761142212?auto=format&fit=crop&w=1200&q=80")'
+            'linear-gradient(135deg, rgba(12, 36, 97, 0.9), rgba(30, 55, 153, 0.95)), url("https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1200&q=80")'
         ];
 
         let cupsData = [];
@@ -416,11 +412,9 @@
             if (!soundEnabled) return;
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             if (audioCtx.state === 'suspended') audioCtx.resume();
-
             if (musicInterval) clearInterval(musicInterval);
 
             const titanicNotes = [523.25, 587.33, 659.25, 587.33, 523.25, 440, 493.88, 523.25];
-            const chineseNotes = [523.25, 587.33, 659.25, 783.99, 880, 783.99, 659.25, 587.33];
             let noteIndex = 0;
 
             musicInterval = setInterval(() => {
@@ -429,20 +423,14 @@
                     let osc = audioCtx.createOscillator();
                     let gain = audioCtx.createGain();
                     osc.type = 'sine';
-                    
-                    let melody = currentTrackIndex === 0 ? titanicNotes : chineseNotes;
-                    osc.frequency.setValueAtTime(melody[noteIndex], audioCtx.currentTime);
-                    
+                    osc.frequency.setValueAtTime(titanicNotes[noteIndex], audioCtx.currentTime);
                     gain.gain.setValueAtTime(0.03, audioCtx.currentTime);
                     gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.5);
-                    
                     osc.connect(gain);
                     gain.connect(audioCtx.destination);
-                    
                     osc.start();
                     osc.stop(audioCtx.currentTime + 1.5);
-
-                    noteIndex = (noteIndex + 1) % melody.length;
+                    noteIndex = (noteIndex + 1) % titanicNotes.length;
                 } catch(e) {}
             }, 2000);
         }
@@ -450,17 +438,13 @@
         function toggleSound() {
             soundEnabled = !soundEnabled;
             document.getElementById('soundBtn').innerText = soundEnabled ? '🔊' : '🔇';
-            if (soundEnabled) {
-                startContinuousMusic();
-            } else {
-                if (musicInterval) clearInterval(musicInterval);
-            }
+            if (soundEnabled) startContinuousMusic();
+            else if (musicInterval) clearInterval(musicInterval);
         }
 
         function switchMusicTrack() {
             currentTrackIndex = (currentTrackIndex + 1) % 2;
-            let trackName = currentTrackIndex === 0 ? "موسيقى تيتانيك الهادئة" : "الموسيقى الصينية الشهيرة";
-            alert(`🎼 تم التبديل إلى: ${trackName}`);
+            alert("🎼 تم تغيير النغمة الصوتية بنجاح.");
             if (soundEnabled) startContinuousMusic();
         }
 
@@ -470,16 +454,12 @@
         }
 
         function triggerVibration() {
-            if (vibrateEnabled && navigator.vibrate) {
-                navigator.vibrate(40);
-            }
+            if (vibrateEnabled && navigator.vibrate) navigator.vibrate(40);
         }
 
         function initLevel() {
             selectedCupIndex = null;
-            let isHard = (currentLevel % 4 === 0);
-            let numCups = isHard ? Math.min(4 + Math.floor(currentLevel / 50), 7) : 4;
-            
+            let numCups = 4;
             cupsData = [];
             let activeColors = palette.slice(0, numCups - 1);
             let pool = [];
@@ -492,21 +472,16 @@
                 cupsData.push([pool.pop(), pool.pop(), pool.pop(), pool.pop()]);
             }
             cupsData.push([]);
-            if(isHard && numCups > 5) cupsData.push([]);
 
             document.body.style.background = naturalBgs[(currentLevel - 1) % naturalBgs.length];
             document.body.style.backgroundSize = 'cover';
-
             renderCups();
-            document.getElementById('levelText').innerText = `المستوى ${currentLevel} ${isHard ? '🔥 صعبة' : '🌱 سهلة'}`;
-            
+            document.getElementById('levelText').innerText = `المستوى ${currentLevel}`;
             if (soundEnabled && !musicInterval) startContinuousMusic();
         }
 
         function changeCupStyle() {
             currentCupStyleId = (currentCupStyleId % 3) + 1;
-            let names = {1: "الأباريق الملكية", 2: "الكؤوس الكلاسيكية", 3: "القوارير المخبرية"};
-            alert(`🎨 تم تغيير الواجهة إلى: ${names[currentCupStyleId]}`);
             renderCups();
         }
 
@@ -547,7 +522,6 @@
         function moveLiquid(from, to) {
             let fromCup = cupsData[from];
             let toCup = cupsData[to];
-
             if (fromCup.length === 0) return;
             let colorToMove = fromCup[fromCup.length - 1];
             
@@ -565,9 +539,7 @@
 
         function checkWin() {
             let won = cupsData.every(cup => cup.length === 0 || (cup.length === 4 && cup.every(v => v === cup[0])));
-            if (won) {
-                triggerWinEffects();
-            }
+            if (won) triggerWinEffects();
         }
 
         function triggerWinEffects() {
@@ -575,21 +547,13 @@
             balance += earned;
             if (balance > targetBalance) balance = targetBalance;
             updateWalletUI();
-
             document.getElementById('rewardText').innerText = `+$${earned.toFixed(3)}`;
             document.getElementById('winModal').classList.add('active');
-
-            if (currentLevel % 5 === 0) {
-                setTimeout(() => {
-                    alert("📢 إعلان ممول بين المستويات (أكملت 5 مستويات بنجاح)!");
-                }, 400);
-            }
         }
 
         function nextLevel() {
             document.getElementById('winModal').classList.remove('active');
             currentLevel++;
-            if (currentLevel > 300) currentLevel = 300;
             initLevel();
         }
 
@@ -609,21 +573,17 @@
         }
 
         function watchAd() {
-            alert("▶️ جاري تشغيل إعلان الفيديو الافتراضي...");
             if (adCallback) adCallback();
             closeAdModal();
         }
 
         function watchDoubleAd() {
-            alert("▶️ جاري عرض إعلان المضاعفة...");
             balance += 0.001;
             updateWalletUI();
             document.getElementById('winModal').classList.remove('active');
             currentLevel++;
             initLevel();
         }
-
-        updateWalletUI();
 
         function updateWalletUI() {
             document.getElementById('balanceText').innerText = `$${balance.toFixed(3)}`;
@@ -632,14 +592,8 @@
             document.getElementById('progressBar').style.width = `${progress}%`;
         }
 
-        function openWalletModal() {
-            document.getElementById('walletModal').classList.add('active');
-        }
-
-        function closeWalletModal() {
-            document.getElementById('walletModal').classList.remove('active');
-        }
-
+        function openWalletModal() { document.getElementById('walletModal').classList.add('active'); }
+        function closeWalletModal() { document.getElementById('walletModal').classList.remove('active'); }
         function selectMethod(method) {
             selectedPaymentMethod = method;
             document.querySelectorAll('.method-btn').forEach(btn => btn.classList.remove('selected'));
@@ -648,43 +602,27 @@
 
         function requestWithdraw() {
             let account = document.getElementById('walletAccount').value;
-            if (!account) {
-                alert("الرجاء إدخال تفاصيل الحساب أو المحفظة!");
-                return;
-            }
+            if (!account) { alert("الرجاء إدخال تفاصيل الحساب أو المحفظة!"); return; }
             if (balance < targetBalance) {
                 alert(`عذراً، رصيدك الحالي ($${balance.toFixed(3)}) لم يبلغ حد السحب الأدنى ($50.00)`);
             } else {
-                alert(`🎉 تم إرسال طلب السحب بنجاح عبر ${selectedPaymentMethod} إلى الحساب: ${account}`);
+                alert(`🎉 تم إرسال طلب السحب بنجاح عبر ${selectedPaymentMethod}`);
                 balance = 0;
                 updateWalletUI();
                 closeWalletModal();
             }
         }
 
-        function openAiHelpModal() {
-            document.getElementById('aiModal').classList.add('active');
-        }
-
-        function closeAiModal() {
-            document.getElementById('aiModal').classList.remove('active');
-        }
+        function openAiHelpModal() { document.getElementById('aiModal').classList.add('active'); }
+        function closeAiModal() { document.getElementById('aiModal').classList.remove('active'); }
 
         function askAiBot() {
             let q = document.getElementById('aiQuestion').value;
             let chatBox = document.getElementById('aiChatResponse');
             if (!q) return;
-
             chatBox.innerHTML += `<br><b>أنت:</b> ${q}`;
-            let reply = "أهلاً بك، يمكنك زيادة أرباحك الخضراء عبر انهاء المستويات (كل مستوى يمنح 0.001 دولار) ومضاعفتها بالإعلانات. حد السحب هو 50 دولار عبر USDT أو PayPal.";
-            if (q.includes("سحب") || q.includes("فلوس")) {
-                reply = "يمكنك السحب فوراً بمجرد وصول شريطك الأخضر إلى 50 دولار من نافذة المحفظة في الأعلى.";
-            } else if (q.includes("مستوى") || q.includes("صعبة")) {
-                reply = "اللعبة تحتوي على 300 مستوى تتدرج من السهولة إلى الصعوبة مع تغيير خلفيات الطبيعة تلقائياً.";
-            }
-
             setTimeout(() => {
-                chatBox.innerHTML += `<br><b style="color:var(--success);">المساعد الذكي:</b> ${reply}`;
+                chatBox.innerHTML += `<br><b style="color:var(--success);">المساعد:</b> تم تسجيل استفسارك، حد السحب 50 دولار.`;
                 chatBox.scrollTop = chatBox.scrollHeight;
             }, 500);
             document.getElementById('aiQuestion').value = '';
